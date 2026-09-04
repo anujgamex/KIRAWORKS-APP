@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>KIRA UPI</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+<style>
+:root{--bg:#090909;--card:#121212;--card2:#171717;--gold:#f5bf42;--gold2:#ffdc73;--text:#fff;--muted:#929292;--line:#2d2618;--danger:#ff5c6c;--ok:#52d273}
+*{box-sizing:border-box}html,body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif}
+body{min-height:100vh;padding-bottom:88px}.wrap{max-width:520px;margin:auto;padding:18px 16px 30px}
+.top{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}.brand{display:flex;gap:12px;align-items:center}.logo{width:48px;height:48px;border-radius:50%;border:1px solid #9b762b;object-fit:cover}.brand b{font-size:20px}.brand small{display:block;color:var(--muted);margin-top:2px}
+.iconbtn,.navbtn{background:#111;border:1px solid var(--line);color:#fff;border-radius:16px}.iconbtn{width:46px;height:46px;font-size:20px}
+.balance{background:linear-gradient(145deg,#151515,#0e0e0e);border:1px solid #443417;border-radius:28px;padding:24px;box-shadow:0 10px 40px #0008}.label{color:#9d9d9d;font-size:13px;letter-spacing:.8px}.amount{font-size:42px;font-weight:800;margin:8px 0 20px}.row{display:flex;gap:12px}.primary,.secondary{flex:1;border-radius:17px;padding:14px 10px;font-size:17px;font-weight:700;cursor:pointer}.primary{background:linear-gradient(180deg,var(--gold2),#eaa900);border:0;color:#111}.secondary{background:#111;border:1px solid #765720;color:#fff}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin:16px 0}.tile{background:#111;border:1px solid #302715;border-radius:18px;padding:15px 6px;text-align:center;color:#ddd;cursor:pointer}.tile .ico{font-size:23px;display:block;margin-bottom:7px}.tile span{font-size:12px}
+.section{margin-top:22px}.section h2{font-size:18px;margin:0 0 12px}.card{background:var(--card);border:1px solid #2e2618;border-radius:22px;padding:18px}.muted{color:var(--muted)}.upi{font-family:ui-monospace,monospace;color:var(--gold2);font-size:15px}
+.tx{display:flex;justify-content:space-between;align-items:center;padding:13px 0;border-bottom:1px solid #242424}.tx:last-child{border-bottom:0}.tx b{font-size:14px}.tx small{color:var(--muted);display:block;margin-top:3px}.credit{color:var(--ok)}.debit{color:#fff}
+.activate{border-color:#70521e}.hidden{display:none!important}
+input{width:100%;background:#0d0d0d;border:1px solid #383027;border-radius:14px;padding:14px;color:#fff;font-size:16px;outline:none}input:focus{border-color:#b98a2c}label{display:block;font-size:13px;color:#aaa;margin:12px 0 7px}.help{color:var(--gold2);text-decoration:none}
+.bottom{position:fixed;left:0;right:0;bottom:0;background:#101010ee;backdrop-filter:blur(14px);border-top:1px solid #302715;display:flex;justify-content:center;z-index:20}.bottomin{max-width:520px;width:100%;display:grid;grid-template-columns:repeat(4,1fr)}.navbtn{border:0;border-radius:0;background:transparent;padding:13px 3px;color:#888;font-size:11px}.navbtn.active{color:var(--gold2)}.navbtn div{font-size:21px;margin-bottom:4px}
+.modal{position:fixed;inset:0;background:#000b;display:flex;align-items:flex-end;z-index:30}.sheet{background:#141414;border:1px solid #3d301c;border-radius:28px 28px 0 0;width:100%;max-width:520px;margin:auto;padding:20px;max-height:88vh;overflow:auto}.sheet h2{margin:0 0 5px}.close{float:right;background:none;border:0;color:#aaa;font-size:25px}.amountInput{font-size:30px;font-weight:800}.adminBadge{color:#111;background:var(--gold);padding:4px 9px;border-radius:10px;font-size:11px;font-weight:800}
+.toast{position:fixed;left:50%;bottom:100px;transform:translateX(-50%);background:#222;border:1px solid #54421f;padding:11px 15px;border-radius:13px;z-index:50;display:none;max-width:90%;text-align:center}
+.qrbox{background:#fff;padding:14px;border-radius:20px;width:max-content;margin:18px auto}.qrbox img{display:block}.profile{display:flex;align-items:center;gap:14px}.avatar{width:58px;height:58px;border-radius:50%;border:1px solid #8e6b27;object-fit:cover;background:#222}.request{border:1px solid #302715;border-radius:18px;padding:15px;margin:10px 0;background:#101010}.request .meta{color:#aaa;font-size:12px;line-height:1.7}.danger{background:#2a1115;border:1px solid #5e2028;color:#ff8792}.ok{background:#142218;border:1px solid #285b35;color:#7ee89a}
+button{font-family:inherit} .wide{width:100%;margin-top:12px}.two{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div class="brand"><img id="logo" class="logo" src="kira_logo.jpg"><div><b>KIRA UPI</b><small>Secure Telegram Wallet</small></div></div>
+    <button class="iconbtn" onclick="showPage('profile')">⚙</button>
+  </div>
+
+  <main id="home">
+    <div class="balance">
+      <div class="label">AVAILABLE BALANCE</div>
+      <div id="balance" class="amount">₹0.00</div>
+      <div class="row"><button class="primary" onclick="openSend()">Send</button><button class="secondary" onclick="openReceive()">Receive</button></div>
+    </div>
+    <div class="grid">
+      <button class="tile" onclick="openSend()"><span class="ico">➤</span><span>Send</span></button>
+      <button class="tile" onclick="openReceive()"><span class="ico">▣</span><span>My QR</span></button>
+      <button class="tile" onclick="openWithdraw()"><span class="ico">⇩</span><span>Withdraw</span></button>
+      <button class="tile" onclick="showPage('history')"><span class="ico">↔</span><span>History</span></button>
+    </div>
+    <div id="activation" class="section card activate hidden">
+      <h2>Activate KIRA UPI</h2><p class="muted">Set your KIRA UPI ID and a payment PIN before receiving KIRA transfers.</p>
+      <button class="primary wide" onclick="openSetup()">Activate now</button>
+    </div>
+    <div id="upiCard" class="section card hidden">
+      <div class="label">YOUR KIRA UPI ID</div><div id="upi" class="upi" style="margin:7px 0 4px"></div>
+      <div class="muted" style="font-size:12px">Share this ID to receive KIRA balance.</div>
+    </div>
+    <div class="section"><h2>Recent transactions <button style="float:right;background:none;border:0;color:var(--gold2)" onclick="showPage('history')">View all</button></h2><div id="recent" class="card"><div class="muted">Loading…</div></div></div>
+    <div class="section"><div class="card"><b>Need help?</b><p class="muted">Contact KIRA UPI support.</p><a class="help" href="https://t.me/KIRAUPIBOT">Open @KIRAUPIBOT</a></div></div>
+    <div id="adminHome" class="section hidden"><div class="card"><span class="adminBadge">ADMIN</span><h2 style="margin-top:12px">Withdrawal Requests</h2><p class="muted">Review pending withdrawal requests.</p><button class="primary wide" onclick="showPage('admin')">Open requests</button></div></div>
+  </main>
+
+  <section id="history" class="hidden"><div class="section"><h2>Transaction history</h2><div id="historyList" class="card">Loading…</div></div></section>
+
+  <section id="profile" class="hidden">
+    <div class="section card"><div class="profile"><img id="avatar" class="avatar"><div><h2 id="pname" style="margin:0">User</h2><div id="pid" class="muted"></div><div id="pupi" class="upi"></div></div></div></div>
+    <div class="section card"><h2>Security</h2><button class="secondary wide" onclick="openSetup()">Change KIRA UPI / PIN</button></div>
+    <div class="section card"><h2>Support</h2><a class="help" href="https://t.me/KIRAUPIBOT">@KIRAUPIBOT</a></div>
+    <div id="adminProfile" class="section hidden"><div class="card"><span class="adminBadge">ADMIN</span><button class="primary wide" onclick="showPage('admin')">Withdrawal Requests</button></div></div>
+  </section>
+
+  <section id="admin" class="hidden"><div class="section"><h2>Admin · Withdrawal Requests</h2><div id="requests">Loading…</div></div></section>
+</div>
+
+<nav class="bottom"><div class="bottomin">
+  <button id="nHome" class="navbtn active" onclick="showPage('home')"><div>⌂</div>Home</button>
+  <button id="nQr" class="navbtn" onclick="openReceive()"><div>▣</div>QR</button>
+  <button id="nHistory" class="navbtn" onclick="showPage('history')"><div>↔</div>History</button>
+  <button id="nProfile" class="navbtn" onclick="showPage('profile')"><div>◯</div>Profile</button>
+</div></nav>
+
+<div id="modal" class="modal hidden" onclick="if(event.target===this)closeModal()"><div class="sheet" id="sheet"></div></div>
+<div id="toast" class="toast"></div>
+
+<script>
+const tg=window.Telegram?.WebApp; if(tg){tg.ready();tg.expand();}
+const API_BASE = window.KIRA_API_BASE || "https://anujgamex.pythonanywhere.com";
+let state={user:null,isAdmin:false,tx:[],requests:[]};
+
+function initData(){return tg?.initData||""}
+function toast(t){const e=document.getElementById('toast');e.textContent=t;e.style.display='block';clearTimeout(window.tt);window.tt=setTimeout(()=>e.style.display='none',2600)}
+async function api(path,options={}){const headers={'Content-Type':'application/json','X-Telegram-Init-Data':initData()};const r=await fetch(API_BASE+path,{...options,headers:{...headers,...(options.headers||{})}});const d=await r.json().catch(()=>({error:'Invalid server response'}));if(!r.ok)throw Error(d.error||'Request failed');return d}
+function showPage(p){['home','history','profile','admin'].forEach(x=>document.getElementById(x).classList.toggle('hidden',x!==p));document.querySelectorAll('.navbtn').forEach(x=>x.classList.remove('active'));({home:'nHome',history:'nHistory',profile:'nProfile'}[p]&&document.getElementById({home:'nHome',history:'nHistory',profile:'nProfile'}[p]).classList.add('active'));if(p==='history')renderHistory();if(p==='admin')loadRequests()}
+function openModal(html){document.getElementById('sheet').innerHTML=html;document.getElementById('modal').classList.remove('hidden')}
+function closeModal(){document.getElementById('modal').classList.add('hidden')}
+async function load(){try{const d=await api('/api/me');state.user=d.user;state.isAdmin=d.is_admin;render();}catch(e){toast(e.message)}}
+function render(){const u=state.user||{};document.getElementById('balance').textContent='₹'+Number(u.balance||0).toFixed(2);document.getElementById('pname').textContent=u.first_name||'User';document.getElementById('pid').textContent='Telegram ID: '+u.id;document.getElementById('pupi').textContent=u.kira_upi||'';document.getElementById('upi').textContent=u.kira_upi||'';document.getElementById('upiCard').classList.toggle('hidden',!u.kira_upi);document.getElementById('activation').classList.toggle('hidden',!!u.kira_upi);document.getElementById('adminHome').classList.toggle('hidden',!state.isAdmin);document.getElementById('adminProfile').classList.toggle('hidden',!state.isAdmin);if(u.photo_url)document.getElementById('avatar').src=u.photo_url;renderHistory();if(state.isAdmin)loadRequests()}
+function renderHistory(){const a=state.user?.payment_history||[];const box=document.getElementById('recent');const all=document.getElementById('historyList');if(!a.length){box.innerHTML='<div class="muted">No transactions yet</div>';all.innerHTML='<div class="muted">No transactions yet</div>';return}const html=a.slice().reverse().slice(0,20).map(t=>`<div class="tx"><div><b>${escapeHtml(t.title||t.method||'Transaction')}</b><small>${escapeHtml(t.date||'')}</small></div><div class="${t.direction==='credit'?'credit':'debit'}">${t.direction==='credit'?'+':'−'}₹${Number(t.amount||0).toFixed(2)}<small>${escapeHtml(t.status||'')}</small></div></div>`).join('');box.innerHTML=html;all.innerHTML=html}
+function escapeHtml(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
+
+function openSetup(){openModal(`<button class="close" onclick="closeModal()">×</button><h2>Activate KIRA UPI</h2><p class="muted">Your KIRA UPI ID will use the format <b>TelegramID@kira</b>.</p><label>KIRA UPI ID</label><input id="setupUpi" value="${escapeHtml(state.user?.kira_upi||((state.user?.id||'')+'@kira'))}" readonly><label>4-digit Payment PIN</label><input id="setupPin" inputmode="numeric" maxlength="4" placeholder="••••" type="password"><button class="primary wide" onclick="setupAccount()">Save securely</button>`)}
+async function setupAccount(){const pin=document.getElementById('setupPin').value;if(!/^\d{4}$/.test(pin))return toast('PIN must be exactly 4 digits');try{const d=await api('/api/setup',{method:'POST',body:JSON.stringify({pin})});state.user=d.user;closeModal();render();toast('KIRA UPI activated');}catch(e){toast(e.message)}}
+
+function openSend(){if(!state.user?.kira_upi)return openSetup();openModal(`<button class="close" onclick="closeModal()">×</button><h2>Send KIRA</h2><p class="muted">Send to a KIRA UPI ID ending in @kira.</p><label>Receiver KIRA UPI ID</label><input id="sendTo" placeholder="123456789@kira"><label>Amount</label><input id="sendAmount" class="amountInput" inputmode="decimal" placeholder="₹0"><label>Payment PIN</label><input id="sendPin" inputmode="numeric" maxlength="4" type="password" placeholder="••••"><button class="primary wide" onclick="sendMoney()">Send securely</button>`)}
+async function sendMoney(){const to=document.getElementById('sendTo').value.trim().toLowerCase(),amount=Number(document.getElementById('sendAmount').value),pin=document.getElementById('sendPin').value;if(!to.endsWith('@kira'))return toast('Enter a KIRA UPI ID ending @kira');if(!(amount>0))return toast('Enter a valid amount');try{const d=await api('/api/transfer',{method:'POST',body:JSON.stringify({to,amount,pin})});state.user=d.user;closeModal();render();toast('Transfer successful')}catch(e){toast(e.message)}}
+
+function openReceive(){if(!state.user?.kira_upi)return openSetup();openModal(`<button class="close" onclick="closeModal()">×</button><h2>Receive KIRA</h2><div class="qrbox" id="qr"></div><div style="text-align:center"><div class="upi">${escapeHtml(state.user.kira_upi)}</div><button class="secondary wide" onclick="copyText('${escapeHtml(state.user.kira_upi)}')">Copy UPI ID</button></div>`);new QRCode(document.getElementById('qr'),{text:'kira://pay?pa='+state.user.kira_upi+'&pn='+encodeURIComponent(state.user.first_name||'KIRA User'),width:220,height:220});}
+async function copyText(t){try{await navigator.clipboard.writeText(t);toast('Copied')}catch(e){toast(t)}}
+
+function openWithdraw(){if(!state.user)return;openModal(`<button class="close" onclick="closeModal()">×</button><h2>Withdraw to UPI</h2><p class="muted">Enter the real UPI ID where the payout should be sent. This creates a pending request for KIRA admins.</p><label>Amount</label><input id="wdAmount" class="amountInput" inputmode="decimal" placeholder="₹0"><label>Real UPI ID</label><input id="wdUpi" placeholder="name@bank"><button class="primary wide" onclick="withdraw()">Submit withdrawal request</button><small class="muted" style="display:block;margin-top:10px">Minimum ₹20. Admin approval is required.</small>`)}
+async function withdraw(){const amount=Number(document.getElementById('wdAmount').value),upi=document.getElementById('wdUpi').value.trim();if(amount<20)return toast('Minimum withdrawal is ₹20');if(!/^[\\w.\\-]{2,}@[A-Za-z0-9.\\-]{2,}$/.test(upi))return toast('Enter a valid real UPI ID');try{const d=await api('/api/withdraw',{method:'POST',body:JSON.stringify({amount,upi})});state.user=d.user;closeModal();render();toast('Withdrawal request sent to admin')}catch(e){toast(e.message)}}
+
+async function loadRequests(){if(!state.isAdmin)return;try{const d=await api('/api/admin/withdrawals');state.requests=d.requests;document.getElementById('requests').innerHTML=d.requests.length?d.requests.map(r=>`<div class="request"><b>₹${Number(r.amount).toFixed(2)}</b> <span class="muted">Pending</span><div class="meta">User: ${escapeHtml(r.first_name)}<br>Telegram ID: ${r.user_id}<br>Real UPI: <span class="upi">${escapeHtml(r.upi)}</span><br>Request: ${r.id}</div><div class="two"><button class="primary" onclick="adminAction('${r.id}','approve')">Approve</button><button class="secondary danger" onclick="adminAction('${r.id}','reject')">Reject</button></div></div>`).join(''):'<div class="card muted">No pending withdrawal requests.</div>'}catch(e){document.getElementById('requests').innerHTML='<div class="card">'+escapeHtml(e.message)+'</div>'}}
+async function adminAction(id,action){if(!confirm(action==='approve'?'Approve this withdrawal?':'Reject this withdrawal?'))return;try{await api('/api/admin/withdrawals/'+id,{method:'POST',body:JSON.stringify({action})});toast('Request '+action+'d');loadRequests();load()}catch(e){toast(e.message)}}
+
+load();
+</script>
+</body>
+</html>
